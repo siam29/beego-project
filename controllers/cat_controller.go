@@ -13,70 +13,61 @@ type CatController struct {
 	web.Controller
 }
 
-// GetCatImages handles the API request to fetch multiple cat images by breed
-func (c *CatController) GetCatImages() {
-	apiKey, err := web.AppConfig.String("cat_api_key")
-	if err != nil {
-		c.Ctx.WriteString("Error retrieving API key: " + err.Error())
-		return
-	}
+type CatImage struct {
+	ID  string `json:"id"`
+	URL string `json:"url"`
+}
 
-	// Get the breed from the query parameters
+// Function to fetch cat images from TheCatAPI
+func (c *CatController) GetCatImages() {
 	breed := c.GetString("breed")
 	if breed == "" {
-		c.Ctx.ResponseWriter.WriteHeader(http.StatusBadRequest)
-		c.Ctx.WriteString("No breed specified")
+		c.Data["json"] = map[string]string{"message": "Breed not specified"}
+		c.ServeJSON()
 		return
 	}
 
-	// URL to fetch multiple images (limit set to 5)
+	// URL for TheCatAPI to get multiple images of the specified breed
 	url := fmt.Sprintf("https://api.thecatapi.com/v1/images/search?breed_ids=%s&limit=5", breed)
 
-	req, err := http.NewRequest("GET", url, nil)
+	// Make the HTTP request to TheCatAPI
+	resp, err := http.Get(url)
 	if err != nil {
-		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
-		c.Ctx.WriteString("Error creating request: " + err.Error())
-		return
-	}
-	req.Header.Set("x-api-key", apiKey)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
-		c.Ctx.WriteString("Error fetching cat images: " + err.Error())
+		c.Data["json"] = map[string]string{"message": "Error fetching cat images"}
+		c.ServeJSON()
 		return
 	}
 	defer resp.Body.Close()
 
+	// Read response body
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
-		c.Ctx.WriteString("Error reading response: " + err.Error())
+		c.Data["json"] = map[string]string{"message": "Error reading response"}
+		c.ServeJSON()
 		return
 	}
 
-	var images []struct {
-		URL string `json:"url"`
-	}
+	// Unmarshal the JSON response into CatImage structure
+	var images []CatImage
 	if err := json.Unmarshal(body, &images); err != nil {
-		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
-		c.Ctx.WriteString("Error parsing JSON: " + err.Error())
+		c.Data["json"] = map[string]string{"message": "Error parsing response"}
+		c.ServeJSON()
 		return
 	}
 
-	// Prepare the JSON response with image URLs
+	// Return the list of image URLs as JSON
 	var imageURLs []string
-	for _, img := range images {
-		imageURLs = append(imageURLs, img.URL)
+	for _, image := range images {
+		imageURLs = append(imageURLs, image.URL)
 	}
 
-	response := map[string]interface{}{
-		"ImageURLs": imageURLs,
-		"Breed":     breed,
+	c.Data["json"] = map[string]interface{}{
+		"Images": imageURLs,
 	}
-
-	// Send JSON response
-	c.Data["json"] = response
 	c.ServeJSON()
+}
+
+// Display the search page with a dropdown for selecting a breed
+func (c *CatController) Get() {
+	c.TplName = "cat_search.tpl"
 }

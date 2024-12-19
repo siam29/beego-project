@@ -7,9 +7,7 @@ import (
 )
 
 func init() {
-	// Root route to handle index
+	// Register the route for CatController
 	web.Router("/", &controllers.CatController{})
-
-	// Route to handle fetching cat images by breed
-	web.Router("/catimage", &controllers.CatController{}, "get:GetCatImage")
+	web.Router("/catimages", &controllers.CatController{}, "get:GetCatImages")
 }
