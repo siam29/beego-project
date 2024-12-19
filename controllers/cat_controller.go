@@ -13,19 +13,8 @@ type CatController struct {
 	web.Controller
 }
 
-type CatImage struct {
-	URL   string `json:"url"`
-	Breed string `json:"breed"`
-}
-
-// GetSearchPage renders the cat search page
-func (c *CatController) GetSearchPage() {
-	// This will render the cat_search.tpl template when the user visits the root route
-	c.TplName = "cat_search.tpl"
-}
-
-// GetCatImage handles the API request to fetch cat images by breed
-func (c *CatController) GetCatImage() {
+// GetCatImages handles the API request to fetch multiple cat images by breed
+func (c *CatController) GetCatImages() {
 	apiKey, err := web.AppConfig.String("cat_api_key")
 	if err != nil {
 		c.Ctx.WriteString("Error retrieving API key: " + err.Error())
@@ -40,8 +29,8 @@ func (c *CatController) GetCatImage() {
 		return
 	}
 
-	// URL with breed filter
-	url := fmt.Sprintf("https://api.thecatapi.com/v1/images/search?breed_ids=%s", breed)
+	// URL to fetch multiple images (limit set to 5)
+	url := fmt.Sprintf("https://api.thecatapi.com/v1/images/search?breed_ids=%s&limit=5", breed)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -55,7 +44,7 @@ func (c *CatController) GetCatImage() {
 	resp, err := client.Do(req)
 	if err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
-		c.Ctx.WriteString("Error fetching cat image: " + err.Error())
+		c.Ctx.WriteString("Error fetching cat images: " + err.Error())
 		return
 	}
 	defer resp.Body.Close()
@@ -76,14 +65,15 @@ func (c *CatController) GetCatImage() {
 		return
 	}
 
-	// Prepare the JSON response
-	response := map[string]interface{}{
-		"ImageURL": "",
-		"Breed":    breed,
+	// Prepare the JSON response with image URLs
+	var imageURLs []string
+	for _, img := range images {
+		imageURLs = append(imageURLs, img.URL)
 	}
 
-	if len(images) > 0 {
-		response["ImageURL"] = images[0].URL
+	response := map[string]interface{}{
+		"ImageURLs": imageURLs,
+		"Breed":     breed,
 	}
 
 	// Send JSON response
