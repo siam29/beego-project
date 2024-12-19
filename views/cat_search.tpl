@@ -18,6 +18,36 @@
             <option value="bobs">American Bobtail</option>
             <option value="curl">American Curl</option>
             <option value="sh">American Shorthair</option>
+            <option value="abys">American Wirehair</option>
+            <option value="abys">Arabian Mau</option>
+            <option value="abys">Australian Mist</option>
+            <option value="abys">Balinese</option>
+            <option value="abys">Bambino</option>
+            <option value="abys">Bengal</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Bombay</option>
+            <option value="abys">British Longhair</option>
+            <option value="abys">British Shorthair</option>
+            <option value="abys">Burmese</option>
+            <option value="abys">Burmilla</option>
+            <option value="abys">California Spangled</option>
+            <option value="abys">Chantilly-Tiffany</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
+            <option value="abys">Birman</option>
         </select>
 
         <!-- Display Cat Image -->
