@@ -1,0 +1,27 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.container {
+    margin-top: 50px;
+}
+
+.dropdown {
+    padding: 10px;
+    font-size: 16px;
+}
+
+.result {
+    margin-top: 20px;
+}
+
+#catImage {
+    max-width: 80%;
+    margin-bottom: 10px;
+}
+
+#catDescription {
+    font-size: 18px;
+    font-weight: bold;
+}
