@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/beego/beego/v2/core/config"
 	"github.com/beego/beego/v2/server/web"
 )
 
@@ -13,61 +14,101 @@ type CatController struct {
 	web.Controller
 }
 
-type CatImage struct {
-	ID  string `json:"id"`
-	URL string `json:"url"`
+// BreedData struct to hold breed description and images
+type BreedData struct {
+	Description string   `json:"description"`
+	Images      []string `json:"images"`
 }
 
-// Function to fetch cat images from TheCatAPI
-func (c *CatController) GetCatImages() {
-	breed := c.GetString("breed")
-	if breed == "" {
-		c.Data["json"] = map[string]string{"message": "Breed not specified"}
-		c.ServeJSON()
-		return
-	}
+// Get handles the request for cat breeds and their data
+func (c *CatController) Get() {
+	// Get breed from the URL parameter
+	breedID := c.GetString("breed")
 
-	// URL for TheCatAPI to get multiple images of the specified breed
-	url := fmt.Sprintf("https://api.thecatapi.com/v1/images/search?breed_ids=%s&limit=5", breed)
-
-	// Make the HTTP request to TheCatAPI
-	resp, err := http.Get(url)
+	// Fetch breed data
+	breedData, err := c.fetchBreedData(breedID)
 	if err != nil {
-		c.Data["json"] = map[string]string{"message": "Error fetching cat images"}
-		c.ServeJSON()
-		return
-	}
-	defer resp.Body.Close()
-
-	// Read response body
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		c.Data["json"] = map[string]string{"message": "Error reading response"}
+		c.Data["json"] = map[string]string{"error": err.Error()}
 		c.ServeJSON()
 		return
 	}
 
-	// Unmarshal the JSON response into CatImage structure
-	var images []CatImage
-	if err := json.Unmarshal(body, &images); err != nil {
-		c.Data["json"] = map[string]string{"message": "Error parsing response"}
-		c.ServeJSON()
-		return
-	}
-
-	// Return the list of image URLs as JSON
-	var imageURLs []string
-	for _, image := range images {
-		imageURLs = append(imageURLs, image.URL)
-	}
-
-	c.Data["json"] = map[string]interface{}{
-		"Images": imageURLs,
-	}
+	// Send breed data to the frontend (as JSON)
+	c.Data["json"] = breedData
 	c.ServeJSON()
 }
 
-// Display the search page with a dropdown for selecting a breed
-func (c *CatController) Get() {
-	c.TplName = "cat_search.tpl"
+// fetchBreedData fetches description and images for the selected breed
+func (c *CatController) fetchBreedData(breedID string) (BreedData, error) {
+	// Access the configuration values from app.conf
+	apiKey := config.String("api_key")
+	baseURL := config.String("base_url")
+
+	// Fetch breed description
+	descriptionURL := fmt.Sprintf("%sbreeds", baseURL)
+	req, err := http.NewRequest("GET", descriptionURL, nil)
+	if err != nil {
+		return BreedData{}, fmt.Errorf("Error creating request for breed data: %v", err)
+	}
+	req.Header.Set("x-api-key", apiKey)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return BreedData{}, fmt.Errorf("Error fetching breed data: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return BreedData{}, fmt.Errorf("Error reading breed response body: %v", err)
+	}
+
+	var breeds []map[string]interface{}
+	err = json.Unmarshal(body, &breeds)
+	if err != nil {
+		return BreedData{}, fmt.Errorf("Error unmarshalling breed data: %v", err)
+	}
+
+	var description string
+	for _, breed := range breeds {
+		if breed["id"] == breedID {
+			description = breed["description"].(string)
+			break
+		}
+	}
+
+	// Fetch images of the selected breed
+	imagesURL := fmt.Sprintf("%simages/search?breed_ids=%s&limit=5", baseURL, breedID)
+	req, err = http.NewRequest("GET", imagesURL, nil)
+	if err != nil {
+		return BreedData{}, fmt.Errorf("Error creating request for cat images: %v", err)
+	}
+	req.Header.Set("x-api-key", apiKey)
+
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		return BreedData{}, fmt.Errorf("Error fetching cat images: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return BreedData{}, fmt.Errorf("Error reading images response body: %v", err)
+	}
+
+	var images []map[string]interface{}
+	err = json.Unmarshal(body, &images)
+	if err != nil {
+		return BreedData{}, fmt.Errorf("Error unmarshalling image data: %v", err)
+	}
+
+	var imageURLs []string
+	for _, image := range images {
+		imageURLs = append(imageURLs, image["url"].(string))
+	}
+
+	return BreedData{
+		Description: description,
+		Images:      imageURLs,
+	}, nil
 }

@@ -1,31 +1,42 @@
-function fetchCatImages() {
-    const breed = document.getElementById('catBreedSelect').value;
-    if (!breed) {
-        alert("Please select a breed.");
-        return;
+document.getElementById("breed-select").addEventListener("change", function() {
+    const breedID = this.value;
+    if (breedID) {
+        fetchBreedData(breedID);
     }
+});
 
-    fetch(`/catimages?breed=${breed}`)
+function fetchBreedData(breedID) {
+    fetch(`/cat/getBreedData?breed=${breedID}`)
         .then(response => response.json())
         .then(data => {
-            const catResult = document.getElementById('catResult');
-            catResult.innerHTML = ''; // Clear any existing content
-
-            if (data.ImageURLs && data.ImageURLs.length > 0) {
-                data.ImageURLs.forEach(url => {
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.alt = data.Breed;
-                    img.style.maxWidth = '80%';
-                    img.style.marginBottom = '10px';
-                    catResult.appendChild(img);
-                });
-            } else {
-                catResult.innerHTML = '<p>No images found for this breed.</p>';
-            }
+            displayBreedData(data);
         })
-        .catch(error => {
-            console.error('Error fetching cat images:', error);
-            alert('Failed to fetch cat images.');
-        });
+        .catch(error => console.error("Error fetching breed data:", error));
+}
+
+function displayBreedData(data) {
+    const descriptionElement = document.getElementById("breed-description");
+    const imagesElement = document.getElementById("cat-images");
+
+    // Clear previous content
+    descriptionElement.innerHTML = "";
+    imagesElement.innerHTML = "";
+
+    // Display breed description
+    descriptionElement.innerHTML = `<h2>Description</h2><p>${data.Description}</p>`;
+
+    // Display breed images
+    let imageIndex = 0;
+    const images = data.Images;
+    const imageInterval = setInterval(() => {
+        if (imageIndex < images.length) {
+            const imgElement = document.createElement("img");
+            imgElement.src = images[imageIndex];
+            imgElement.alt = "Cat Image";
+            imagesElement.appendChild(imgElement);
+            imageIndex++;
+        } else {
+            clearInterval(imageInterval);  // Stop after displaying 5 images
+        }
+    }, 3000);  // Show images every 3000ms
 }

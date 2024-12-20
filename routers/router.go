@@ -7,7 +7,5 @@ import (
 )
 
 func init() {
-	// Register the route for CatController
-	web.Router("/", &controllers.CatController{})
-	web.Router("/catimages", &controllers.CatController{}, "get:GetCatImages")
+	web.Router("/cat/getBreedData", &controllers.CatController{}, "get:GetBreedData")
 }

@@ -1,27 +1,19 @@
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
+    padding: 20px;
 }
 
-.container {
-    margin-top: 50px;
-}
-
-.dropdown {
+#breed-select {
+    margin-bottom: 20px;
     padding: 10px;
-    font-size: 16px;
 }
 
-.result {
+#breed-description {
     margin-top: 20px;
 }
 
-#catImage {
-    max-width: 80%;
-    margin-bottom: 10px;
-}
-
-#catDescription {
-    font-size: 18px;
-    font-weight: bold;
+#cat-images img {
+    width: 300px;
+    height: auto;
+    margin: 10px;
 }
