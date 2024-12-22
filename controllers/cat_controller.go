@@ -74,20 +74,32 @@ func (c *CatController) StreamBreed() {
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 
-	// Get breed description
+	// Get breed description and name
 	var description string
+	var name string
+	var origin string
 	mu.RLock()
 	for _, breed := range catBreeds {
 		if breed.ID == breedID {
 			description = breed.Description
+			name = breed.Name
+			origin = breed.Origin
 			break
 		}
 	}
 	mu.RUnlock()
 
-	// Send description
+	// Send description event
 	fmt.Fprintf(w, "event: description\ndata: %s\n\n", description)
 	w.Flush()
+
+	// Send name event
+	fmt.Fprintf(w, "event: name\ndata: %s\n\n", name)
+	w.Flush()
+
+	fmt.Fprintf(w, "event: origin\ndata: %s\n\n", origin)
+	w.Flush()
+
 
 	// Create channels for communication
 	done := make(chan struct{})
@@ -112,7 +124,7 @@ func (c *CatController) StreamBreed() {
 				if err != nil {
 					continue
 				}
-				
+
 				var images []CatImage
 				json.NewDecoder(resp.Body).Decode(&images)
 				resp.Body.Close()
@@ -140,6 +152,7 @@ func (c *CatController) StreamBreed() {
 		}
 	}
 }
+
 
 // Handle random images for voting
 func (c *CatController) GetRandomImages() {

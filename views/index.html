@@ -4,276 +4,66 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cat Viewer</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 20px;
-        background-color: #f4f4f9;
-      }
-      h1 {
-        text-align: center;
-      }
-      .nav-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 30px;
-        margin-bottom: 30px;
-      }
-      .button-active {
-        font-weight: bold;
-        color: #d9534f;
-      }
-      .section {
-        display: none;
-      }
-      .section.active {
-        display: block;
-      }
-      .image-container {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 20px;
-      }
-      #cat-image {
-        max-width: 100%;
-        height: auto;
-        border-radius: 8px;
-      }
-      .vote-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        margin-top: 10px;
-      }
-      .grid-view {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 15px;
-        margin-top: 20px;
-      }
-      .grid-view img {
-        width: 100%;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: transform 0.3s;
-      }
-      .grid-view img:hover {
-        transform: scale(1.1);
-      }
-      .search-container {
-        text-align: center;
-        margin-bottom: 30px;
-      }
-      #breed-select {
-        padding: 8px;
-        font-size: 16px;
-        width: 50%;
-        max-width: 400px;
-        border-radius: 4px;
-      }
-      .cat-description {
-        font-size: 18px;
-        text-align: center;
-        margin-top: 20px;
-        color: #555;
-      }
-    </style>
+    <link rel="stylesheet" href="static/css/style.css" />
   </head>
   <body>
-    <h1>Cat Viewer</h1>
-
-    <!-- Navigation Buttons -->
-    <!-- Navigation Buttons -->
-    <div class="nav-buttons">
-      <button onclick="showSection('voting')" id="voting-btn">Voting</button>
-      <button onclick="showSection('breeds')" id="breeds-btn">Breeds</button>
-      <button onclick="showSection('favs')" id="favs-btn">Favorites</button>
-    </div>
-
-    <!-- Voting Section -->
-    <div id="voting-section" class="section">
-      <div class="image-container">
-        <img id="voting-image" src="" alt="Cat Image" />
+    <div class="container">
+      <!-- Navigation Buttons -->
+      <div class="nav-buttons">
+        <button onclick="showSection('voting')" id="voting-btn">Voting</button>
+        <button onclick="showSection('breeds')" id="breeds-btn">Breeds</button>
+        <button onclick="showSection('favs')" id="favs-btn">❤️</button>
       </div>
-      <div class="vote-buttons">
-        <button onclick="vote('up')">👍</button>
-        <button onclick="vote('favorite')">❤️</button>
-        <button onclick="vote('down')">👎</button>
-      </div>
-    </div>
 
-    <!-- Breeds Section -->
-    <div id="breeds-section" class="section">
-      <div class="search-container">
-        <form id="cat-form">
-          <select name="breed" id="breed">
-            <!-- Assuming server-side templating renders breed options here -->
-            {{ range .Breeds }}
-            <option value="{{ .ID }}">{{ .Name }}</option>
-            {{ end }}
-          </select>
-          <button type="submit">Show</button>
-        </form>
+      <!-- Voting Section -->
+      <div id="voting-section" class="section">
+        <div class="image-container">
+          <img id="voting-image" src="" alt="Cat Image" />
+        </div>
+        <div class="vote-buttons">
+          <button onclick="vote('up')">👍</button>
+          <button onclick="vote('favorite')">❤️</button>
+          <button onclick="vote('down')">👎</button>
+        </div>
       </div>
-      <div class="image-container">
-        <img
-          id="cat-image"
-          src=""
-          alt="Cat Image"
-          style="max-width: 500px; display: block"
-        />
+
+      <!-- Breeds Section -->
+      <div id="breeds-section" class="section">
+        <div class="search-container">
+          <form id="cat-form">
+            <select name="breed" id="breed">
+              <!-- Assuming server-side templating renders breed options here -->
+              {{ range .Breeds }}
+              <option value="{{ .ID }}">{{ .Name }}</option>
+              {{ end }}
+            </select>
+            <button type="submit">Show</button>
+          </form>
+        </div>
+        <div class="image-container">
+          <img
+            id="cat-image"
+            src=""
+            alt="Cat Image"
+            style="width: 300px; height: 200px"
+          />
+        </div>
+        <div class="flex">
+          <p id="cat-name">Select a breed to see its name.</p>
+          <p id="cat-origin">(Origin).</p>
+        </div>
+
         <p id="cat-description">Select a breed to see its description.</p>
+
+        <p id="cat-wikipedia">WIKIPEDIA</p>
+      </div>
+
+      <!-- Favorites Section -->
+      <div id="favs-section" class="section">
+        <div class="grid-view" id="favorites-grid"></div>
       </div>
     </div>
 
-    <!-- Favorites Section -->
-    <div id="favs-section" class="section">
-      <div class="grid-view" id="favorites-grid"></div>
-    </div>
-
-    <script>
-      const form = document.getElementById("cat-form");
-      const image = document.getElementById("cat-image");
-      const description = document.getElementById("cat-description");
-
-      form.addEventListener("submit", (event) => {
-        event.preventDefault();
-
-        const breed = document.getElementById("breed").value;
-
-        // Close existing EventSource if any
-        if (window.eventSource) {
-          window.eventSource.close();
-        }
-
-        // Open a new EventSource with the correct breed parameter
-        window.eventSource = new EventSource(`/stream-breed?breed=${breed}`);
-
-        // Listen for image updates
-        window.eventSource.addEventListener("image", (event) => {
-          image.src = event.data;
-        });
-
-        // Listen for description updates
-        window.eventSource.addEventListener("description", (event) => {
-          description.textContent = event.data;
-        });
-
-        // Handle errors
-        window.eventSource.onerror = () => {
-          console.error("EventSource failed.");
-          window.eventSource.close();
-        };
-      });
-
-      
-
-     let currentImages = [];
-      let currentImageIndex = 0;
-      let currentEventSource = null;
-      let breedData = [];
-
-      // Show the voting section initially
-      showSection("voting");
-
-      function showSection(section) {
-        document
-          .querySelectorAll(".section")
-          .forEach((el) => el.classList.remove("active"));
-        document.getElementById(`${section}-section`).classList.add("active");
-
-        // Update navigation button styles
-        document
-          .querySelectorAll(".nav-buttons button")
-          .forEach((btn) => btn.classList.remove("button-active"));
-        document
-          .getElementById(`${section}-btn`)
-          .classList.add("button-active");
-
-        if (section === "voting") {
-          loadRandomImages();
-        } else if (section === "favs") {
-          loadFavorites();
-        }
-      }
-
-      // Load random images for voting
-      async function loadRandomImages() {
-        const response = await fetch("/random");
-        currentImages = await response.json();
-        currentImageIndex = 0;
-        showCurrentImage();
-      }
-
-      function showCurrentImage() {
-        if (currentImageIndex >= currentImages.length) {
-          loadRandomImages();
-          return;
-        }
-        document.getElementById("voting-image").src =
-          currentImages[currentImageIndex].url;
-      }
-
-      async function vote(voteType) {
-        const image = currentImages[currentImageIndex];
-        await fetch("/vote", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            image_id: image.id,
-            vote_type: voteType,
-          }),
-        });
-        currentImageIndex++;
-        showCurrentImage();
-      }
-
-      // Load favorite images
-      async function loadFavorites() {
-        const response = await fetch("/favorites");
-        const favorites = await response.json();
-        const grid = document.getElementById("favorites-grid");
-        grid.innerHTML = "";
-        favorites.forEach((image) => {
-          const img = document.createElement("img");
-          img.src = image.url;
-          img.alt = "Favorite Cat";
-          grid.appendChild(img);
-        });
-      }
-
-      // Load breed data and populate the dropdown
-      async function loadBreeds() {
-        const response = await fetch("/breeds");
-        breedData = await response.json();
-
-        const breedSelect = document.getElementById("breed-select");
-        breedData.forEach((breed) => {
-          const option = document.createElement("option");
-          option.value = breed.name;
-          option.textContent = breed.name;
-          breedSelect.appendChild(option);
-        });
-
-        breedSelect.addEventListener("change", function () {
-          const selectedBreed = breedData.find(
-            (breed) => breed.name === breedSelect.value
-          );
-          if (selectedBreed) {
-            document.getElementById("breed-image").src = selectedBreed.image;
-            document.getElementById("breed-description").textContent =
-              selectedBreed.description;
-          } else {
-            document.getElementById("breed-image").src = "";
-            document.getElementById("breed-description").textContent =
-              "Select a breed to see its description.";
-          }
-        });
-      }
-
-      // Initial load of breeds when the page loads
-      loadBreeds();
-    </script>
+    <script src="static/js/script.js"></script>
   </body>
 </html>
