@@ -12,7 +12,6 @@ import (
 	"github.com/beego/beego/v2/server/web"
 )
 
-
 type CatController struct {
 	web.Controller
 }
@@ -31,9 +30,9 @@ type CatImage struct {
 }
 
 var (
-	catBreeds  []CatBreed
-	favorites  map[string]bool
-	mu         sync.RWMutex
+	catBreeds []CatBreed
+	favorites map[string]bool
+	mu        sync.RWMutex
 )
 
 func init() {
@@ -100,7 +99,6 @@ func (c *CatController) StreamBreed() {
 	fmt.Fprintf(w, "event: origin\ndata: %s\n\n", origin)
 	w.Flush()
 
-
 	// Create channels for communication
 	done := make(chan struct{})
 	defer close(done)
@@ -152,7 +150,6 @@ func (c *CatController) StreamBreed() {
 		}
 	}
 }
-
 
 // Handle random images for voting
 func (c *CatController) GetRandomImages() {

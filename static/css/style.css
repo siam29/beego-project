@@ -72,11 +72,11 @@ h1 {
   color: #555;
 }
 .container {
-  border-style: solid;
-  border-color: red;
   border-radius: 20px;
   width: 700px;
   height: 500px;
+  box-shadow: 4px 4px 12px rgba(85, 82, 82, 0.5);
+
 }
 #voting-image {
   height: 350px;

@@ -1,4 +1,4 @@
-const form = document.getElementById("cat-form");
+      const form = document.getElementById("cat-form");
       const image = document.getElementById("cat-image");
       const description = document.getElementById("cat-description");
       const name = document.getElementById("cat-name");
