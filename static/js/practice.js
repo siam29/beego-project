@@ -67,25 +67,25 @@
   
     // Show the correct section when a button is clicked
     function showSection(section) {
-        document
+      document
           .querySelectorAll(".section")
           .forEach((el) => el.classList.remove("active"));
-        document.getElementById(`${section}-section`).classList.add("active");
-
-        // Update navigation button styles
-        document
+      document.getElementById(`${section}-section`).classList.add("active");
+  
+      // Update navigation button styles
+      document
           .querySelectorAll(".nav-buttons button")
           .forEach((btn) => btn.classList.remove("button-active"));
-        document
+      document
           .getElementById(`${section}-btn`)
           .classList.add("button-active");
-
-        if (section === "voting") {
-          loadRandomImages();
-        } else if (section === "favs") {
+  
+      // Only call specific loaders where necessary
+      if (section === "favs") {
           loadFavorites();
-        }
       }
+  }
+  
 
       async function loadRandomImages() {
         const response = await fetch("/random");
@@ -103,13 +103,16 @@
     }
   
     function showCurrentImage() {
-        if (currentImageIndex >= currentImages.length) {
+      if (currentImages.length === 0 || currentImageIndex >= currentImages.length) {
+          console.error("No images available. Loading more images...");
           loadRandomImages();
           return;
-        }
-        document.getElementById("voting-image").src =
-          currentImages[currentImageIndex].url;
       }
+  
+      document.getElementById("voting-image").src =
+          currentImages[currentImageIndex].url;
+  }
+  
   
     // Handle vote (up or down) and add to favorites
     async function vote(voteType) {
@@ -137,7 +140,7 @@
     }
   
     // Load and display the favorites section
-  async function loadFavorites() {
+    async function loadFavorites() {
         const response = await fetch("/favorites");
         const favorites = await response.json();
         const grid = document.getElementById("favorites-grid");
@@ -149,6 +152,8 @@
           grid.appendChild(img);
         });
       }
+
+      
   
     // Handle breed form submission
     form.addEventListener("submit", (event) => {
@@ -203,7 +208,9 @@
   
     document.getElementById("voting-btn").addEventListener("click", () => {
       showSection("voting");
-    });
+      loadRandomImages(); // Ensure images are fetched
+  });
+  
   
     document.getElementById("favs-btn").addEventListener("click", () => {
       showSection("favs");
