@@ -1,3 +1,4 @@
+
 const form = document.getElementById("cat-form");
 const breedSelect = document.getElementById("breed");
 const image = document.getElementById("cat-image");
@@ -160,12 +161,21 @@ function showSection(section) {
 
 
 
-  async function loadRandomImages() {
+async function loadRandomImages() {
+  const voteButtons = document.querySelectorAll(".vote-buttons button");
+  voteButtons.forEach((btn) => (btn.disabled = true)); // Disable all vote buttons while fetching
+
+  try {
     const response = await fetch("/random");
     currentImages = await response.json();
     currentImageIndex = 0;
     showCurrentImage();
+  } catch (error) {
+    console.error("Failed to load images:", error);
+  } finally {
+    voteButtons.forEach((btn) => (btn.disabled = false)); // Re-enable vote buttons after fetching
   }
+}
 
 // Load random images for voting
 async function loadVotingSection() {
@@ -176,16 +186,22 @@ async function loadVotingSection() {
 }
 
 function showCurrentImage() {
-  if (currentImages.length === 0 || currentImageIndex >= currentImages.length) {
-      console.error("No images available. Loading more images...");
-      loadRandomImages();
-      return;
+  if (currentImages.length === 0) {
+    console.error("No images available.");
+    document.getElementById("voting-image").alt = "No images available.";
+    return;
   }
 
-  document.getElementById("voting-image").src =
-      currentImages[currentImageIndex].url;
+  if (currentImageIndex < currentImages.length) {
+    const image = currentImages[currentImageIndex];
+    document.getElementById("voting-image").src = image.url;
+    document.getElementById("voting-image").alt = "Cat Image";
+  } else {
+    console.log("Reloading images...");
+    document.getElementById("voting-image").alt = "Loading new images...";
+    loadRandomImages();
+  }
 }
-
 
 // Handle vote (up or down) and add to favorites
 async function vote(voteType) {
@@ -257,3 +273,5 @@ document.getElementById("down-vote-btn").addEventListener("click", () => {
 
 // Initial setup: load breeds and show the voting section
 loadBreeds();
+
+
