@@ -139,6 +139,7 @@ function loadBreedData(breed) {
   };
 }
 
+const defaultBreed = "abys"; // Default breed ID
 
 // Show the correct section when a button is clicked
 function showSection(section) {
@@ -163,7 +164,28 @@ function showSection(section) {
     loadFavorites();
     // document.getElementById("breedOption").textContent = "Abyssinian";
   }
+  else if (section === "breeds") {
+    // Reset to default breed when navigating back to "breeds"
+    resetToDefaultBreed();
+  }
 
+}
+
+function resetToDefaultBreed() {
+  /*const breedSelect = document.getElementById("breed");
+  const description = document.getElementById("cat-description");
+  const name = document.getElementById("cat-name");
+  const origin = document.getElementById("cat-origin");
+  const image = document.getElementById("cat-image");
+  const wikipediaElement = document.getElementById("cat-wikipedia");
+  */
+
+  // Reset the dropdown to the default option
+  breedSelect.value = defaultBreed;
+
+  
+  // Load the default breed data
+  //loadBreedData(defaultBreed);
 }
 
 
