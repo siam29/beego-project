@@ -96,24 +96,35 @@ async function loadBreeds() {
 }
 
 // Load breed data using EventSource
-function loadBreedData(breedID) {
-  if (currentEventSource) currentEventSource.close();
+function loadBreedData(breed) {
+  const description = document.getElementById("cat-description");
+  const name = document.getElementById("cat-name");
+  const origin = document.getElementById("cat-origin");
+  const image = document.getElementById("cat-image");
 
-  currentEventSource = new EventSource(`/stream-breed?breed=${breedID}`);
+  if (window.eventSource) {
+    window.eventSource.close();
+  }
 
-  currentEventSource.addEventListener("description", (event) => {
+  window.eventSource = new EventSource(`/stream-breed?breed=${breed}`);
+
+  window.eventSource.addEventListener("description", (event) => {
     description.textContent = event.data || "No description available.";
   });
 
-  currentEventSource.addEventListener("name", (event) => {
+  window.eventSource.addEventListener("name", (event) => {
     name.textContent = event.data || "No name available.";
   });
 
-  currentEventSource.addEventListener("origin", (event) => {
+  window.eventSource.addEventListener("origin", (event) => {
     origin.textContent = event.data || "No origin available.";
   });
 
-  currentEventSource.addEventListener("wikipedia", (event) => {
+  window.eventSource.addEventListener("image", (event) => {
+    image.src = event.data;
+  });
+
+  window.eventSource.addEventListener("wikipedia", (event) => {
     const wikipediaElement = document.getElementById("cat-wikipedia");
     if (event.data) {
       wikipediaElement.innerHTML = `<a href="${event.data}" target="_blank" rel="noopener noreferrer">Wikipedia</a>`;
@@ -122,15 +133,12 @@ function loadBreedData(breedID) {
     }
   });
 
-  currentEventSource.addEventListener("image", (event) => {
-    image.src = event.data || "placeholder.png";
-  });
-
-  currentEventSource.onerror = () => {
-    console.error("EventSource error occurred.");
-    currentEventSource.close();
+  window.eventSource.onerror = () => {
+    console.error("EventSource failed.");
+    window.eventSource.close();
   };
 }
+
 
 // Show the correct section when a button is clicked
 function showSection(section) {
@@ -154,10 +162,8 @@ function showSection(section) {
   } else if (section === "favs") {
     loadFavorites();
     // document.getElementById("breedOption").textContent = "Abyssinian";
-  } else {
-    document.getElementById("breed").value = "abys";
-    console.log("hello")
   }
+
 }
 
 
