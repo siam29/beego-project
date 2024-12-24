@@ -65,7 +65,7 @@ let currentImages = [];
 let currentImageIndex = 0;
 let currentEventSource = null;
 let breedData = [];
-
+let cnt = 0;
 showSection("voting");
 
 
@@ -147,8 +147,9 @@ function showSection(section) {
     .getElementById(`${section}-btn`)
     .classList.add("button-active");
 
-  if (section === "voting") {
+  if (section === "voting" & cnt == 0) {
     loadRandomImages();
+    cnt++;
     // document.getElementById("breedOption").textContent = "Abyssinian";
   } else if (section === "favs") {
     loadFavorites();
