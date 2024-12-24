@@ -1,4 +1,3 @@
-
 const form = document.getElementById("cat-form");
 const breedSelect = document.getElementById("breed");
 const image = document.getElementById("cat-image");
@@ -44,6 +43,16 @@ form.addEventListener("submit", (event) => {
     image.src = event.data;
   });
 
+  window.eventSource.addEventListener("wikipedia", (event) => {
+    const wikipediaElement = document.getElementById("cat-wikipedia");
+    if (event.data) {
+      wikipediaElement.innerHTML = `<a href="${event.data}" target="_blank" rel="noopener noreferrer">Wikipedia</a>`;
+    } else {
+      wikipediaElement.textContent = "Select a breed to see its Wikipedia link.";
+    }
+  });
+  
+
   // Handle errors
   window.eventSource.onerror = () => {
     console.error("EventSource failed.");
@@ -61,6 +70,7 @@ showSection("voting");
 
 
 // Load breed data and automatically show Abyssinian
+// Load breed data and automatically show Abyssinian
 async function loadBreeds() {
   try {
     const response = await fetch("/breeds");
@@ -77,14 +87,13 @@ async function loadBreeds() {
       breedSelect.appendChild(option);
     });
 
-    // Load breed data for Abyssinian by default
-    //loadBreedData("abys");
+    // Automatically select the Abyssinian breed and show its Wikipedia link
+    loadBreedData("abys");
+
   } catch (error) {
     console.error("Error loading breeds:", error.message);
   }
 }
-
-
 
 // Load breed data using EventSource
 function loadBreedData(breedID) {
@@ -104,6 +113,15 @@ function loadBreedData(breedID) {
     origin.textContent = event.data || "No origin available.";
   });
 
+  currentEventSource.addEventListener("wikipedia", (event) => {
+    const wikipediaElement = document.getElementById("cat-wikipedia");
+    if (event.data) {
+      wikipediaElement.innerHTML = `<a href="${event.data}" target="_blank" rel="noopener noreferrer">Wikipedia</a>`;
+    } else {
+      wikipediaElement.textContent = "Select a breed to see its Wikipedia link.";
+    }
+  });
+
   currentEventSource.addEventListener("image", (event) => {
     image.src = event.data || "placeholder.png";
   });
@@ -113,6 +131,7 @@ function loadBreedData(breedID) {
     currentEventSource.close();
   };
 }
+
 
 
 

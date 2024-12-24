@@ -10,9 +10,9 @@
     <div class="container">
       <!-- Navigation Buttons -->
       <div class="nav-buttons">
-        <button onclick="showSection('voting')" id="voting-btn">Voting</button>
-        <button onclick="showSection('breeds')" id="breeds-btn">Breeds</button>
-        <button onclick="showSection('favs')" id="favs-btn">❤️</button>
+        <button onclick="handleButtonClick('voting')" id="voting-btn">Voting</button>
+        <button onclick="handleButtonClick('breeds')" id="breeds-btn">Breeds</button>
+        <button onclick="handleButtonClick('favs')" id="favs-btn">❤️</button>
       </div>
 
       <!-- Voting Section -->
@@ -30,14 +30,14 @@
       <!-- Breeds Section -->
       <div id="breeds-section" class="section">
         <div class="search-container">
-          <form id="cat-form">
+          <form id="cat-form" onsubmit="return false;">
             <select name="breed" id="breed">
               <!-- Assuming server-side templating renders breed options here -->
               {{ range .Breeds }}
               <option value="{{ .ID }}">{{ .Name }}</option>
               {{ end }}
             </select>
-            <button type="submit">Show</button>
+            <button type="submit" onclick="handleButtonClick('show')">Show</button>
           </form>
         </div>
         <div class="image-container">
@@ -55,7 +55,9 @@
 
         <p id="cat-description">Select a breed to see its description.</p>
 
-        <p id="cat-wikipedia">WIKIPEDIA</p>
+        <p id="cat-wikipedia">Select a breed to see its Wikipedia link.</p>
+
+        
       </div>
 
       <!-- Favorites Section -->
@@ -63,6 +65,9 @@
         <div class="grid-view" id="favorites-grid"></div>
       </div>
     </div>
+
+    <!-- Loader -->
+    <div id="loader" class="loader"></div>
 
     <script src="static/js/practice.js"></script>
   </body>

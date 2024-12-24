@@ -3,24 +3,26 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"log"
 	"net/http"
 	"sync"
 	"time"
-
+	//"catapi/models" // Make sure this path is correct based on your project structure
 	"github.com/beego/beego/v2/server/web"
+	"log"
+	"io"
 )
-
 type CatController struct {
 	web.Controller
 }
+
 
 type CatBreed struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Origin      string `json:"origin"`
+	WikipediaURL string `json:"wikipedia_url"`
+	 
 }
 
 type CatImage struct {
@@ -53,6 +55,7 @@ func init() {
 	}
 }
 
+
 // Handle the main page
 func (c *CatController) Index() {
 	mu.RLock()
@@ -77,12 +80,14 @@ func (c *CatController) StreamBreed() {
 	var description string
 	var name string
 	var origin string
+	var wikipediaURL string
 	mu.RLock()
 	for _, breed := range catBreeds {
 		if breed.ID == breedID {
 			description = breed.Description
 			name = breed.Name
 			origin = breed.Origin
+			wikipediaURL = breed.WikipediaURL
 			break
 		}
 	}
@@ -97,6 +102,10 @@ func (c *CatController) StreamBreed() {
 	w.Flush()
 
 	fmt.Fprintf(w, "event: origin\ndata: %s\n\n", origin)
+	w.Flush()
+
+	// Send Wikipedia link event
+	fmt.Fprintf(w, "event: wikipedia\ndata: %s\n\n", wikipediaURL)
 	w.Flush()
 
 	// Create channels for communication
@@ -150,6 +159,8 @@ func (c *CatController) StreamBreed() {
 		}
 	}
 }
+
+
 
 // Handle random images for voting
 func (c *CatController) GetRandomImages() {
