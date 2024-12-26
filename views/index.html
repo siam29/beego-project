@@ -37,7 +37,6 @@
         <div class="search-container">
           <form id="cat-form" onsubmit="return false;">
             <select name="breed" id="breed">
-              <option value="abys" selected>Abyssinian</option>
               <!-- Assuming server-side templating renders breed options here -->
               {{ range .Breeds }}
               <option value="{{ .ID }}">{{ .Name }}</option>
