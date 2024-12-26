@@ -46,7 +46,7 @@ form.addEventListener("submit", (event) => {
   window.eventSource.addEventListener("wikipedia", (event) => {
     const wikipediaElement = document.getElementById("cat-wikipedia");
     if (event.data) {
-      wikipediaElement.innerHTML = `<a href="${event.data}" target="_blank" rel="noopener noreferrer">Wikipedia</a>`;
+      wikipediaElement.innerHTML = `<a href="${event.data}" class="wiki" target="_blank" rel="noopener noreferrer">Wikipedia</a>`;
     } else {
       wikipediaElement.textContent = "Select a breed to see its Wikipedia link.";
     }
@@ -127,7 +127,7 @@ function loadBreedData(breed) {
   window.eventSource.addEventListener("wikipedia", (event) => {
     const wikipediaElement = document.getElementById("cat-wikipedia");
     if (event.data) {
-      wikipediaElement.innerHTML = `<a href="${event.data}" target="_blank" rel="noopener noreferrer">Wikipedia</a>`;
+      wikipediaElement.innerHTML = `<a href="${event.data}" class="wiki" target="_blank" rel="noopener noreferrer">Wikipedia</a>`;
     } else {
       wikipediaElement.textContent = "Select a breed to see its Wikipedia link.";
     }
