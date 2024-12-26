@@ -190,7 +190,7 @@ func (c *CatController) StreamBreed() {
 		close(originChan)
 		close(wikipediaChan)
 		close(imageChan)
-		close(done)
+		//close(done)
 	}()
 
 	// Fetch breed information and send to channels
