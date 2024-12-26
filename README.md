@@ -34,7 +34,7 @@ cd beego-project/
 ```
 - **3** Run this Project
 ```
-bee run
+go run main.go
 ```
 visit `http://localhost:8080` to view the app in your browser.
 
